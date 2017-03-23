@@ -1,0 +1,23 @@
+{
+  "name": "scrapping",
+  "version": "1.0.0",
+  "description": "Aprendiendo Web-Scrapping con nodejs",
+  "main": "main.js",
+  "scripts": {
+    "test": "iron main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raicerk/webscrapping.git"
+  },
+  "keywords": [
+    "nodejs",
+    "node"
+  ],
+  "author": "Juan Mora",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/raicerk/webscrapping/issues"
+  },
+  "homepage": "https://github.com/raicerk/webscrapping#readme"
+}
