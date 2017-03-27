@@ -8,6 +8,8 @@ app.get('/', function(req, res){
 
   request(config.sitio, function(error, response, html){
 
+    let json = {};
+
     if(!error){
 
       var $ = cheerio.load(html);
@@ -16,19 +18,19 @@ app.get('/', function(req, res){
 
         var data = $(this);
 
-        console.log('--------------------------------------------------------');
-
-        console.log(data[0].children[0].next.attribs.href);
-
-        console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-
+        json.link = data[0].children[0].next.attribs.href;
+        console.log('-----------------------------------');
+        console.log(data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, ''));
+        console.log('-----------------------------------');
         let me = data.find('.ellipsis .tag');
 
+        let obj = [];
+
         for (var i = 0; i < me.length; i++) {
-          console.log(me[i].children[0].data);
+          obj.push(me[i].children[0].data);
         }
 
-        console.log('--------------------------------------------------------');
+        json.skill = JSON.stringify(obj);
 
       })
       res.send({estado:true});

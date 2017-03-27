@@ -1,4 +1,4 @@
 module.exports = {
-  sitio: 'acalapagina',
+  sitio: '',
   puerto : 8083
 };
