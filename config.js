@@ -1,4 +1,4 @@
 module.exports = {
-  sitio: 'https://www.getonbrd.com.co/empleos/programacion',
+  sitio: '',
   puerto : 8083
 };
