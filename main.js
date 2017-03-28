@@ -2,42 +2,53 @@ var express = require('express');
 var request = require('request');
 var cheerio = require('cheerio');
 var app     = express();
-var config = require('./config');
+var config  = require('./config');
 
 app.get('/', function(req, res){
 
   request(config.sitio, function(error, response, html){
 
-    let json = {};
+    let datos = [];
 
     if(!error){
 
       var $ = cheerio.load(html);
 
+      var count = 1;
+
       $('.job').filter(function(){
 
+        count = count+1;
+
         var data = $(this);
+        let obj = [];
+        let json = {};
 
         json.link = data[0].children[0].next.attribs.href;
-        console.log('-----------------------------------');
-        console.log(data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, ''));
-        console.log('-----------------------------------');
-        let me = data.find('.ellipsis .tag');
+        json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '')
 
-        let obj = [];
+        let me = data.find('.ellipsis .tag');
 
         for (var i = 0; i < me.length; i++) {
           obj.push(me[i].children[0].data);
         }
 
-        json.skill = JSON.stringify(obj);
+        json.skill = obj;
 
+        datos.push(json);
+        console.log(count);
       })
-      res.send({estado:true});
+
+      res.send(datos);
+
     }else {
+
       res.send({estado:false});
+
     }
+
   })
+
 })
 
 app.listen(config.puerto);
