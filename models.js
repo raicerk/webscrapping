@@ -3,8 +3,8 @@ var mongoose = require('mongoose'),
 
 var Ofertas = new Schema({
   link: { type : String, required : true, unique : true },
-  fecha: { type : Date, required : true }
-  skill: { type : Array, required : true },
+  fecha: { type : String, required : true },
+  skill: { type : Array, required : true }
 });
 
 module.exports = mongoose.model('jobdata', Ofertas);

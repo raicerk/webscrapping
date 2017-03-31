@@ -4,6 +4,12 @@ var cheerio = require('cheerio');
 var app     = express();
 var config  = require('./config');
 
+var mongoose = require('mongoose');
+var modelo = require('./models')(app,mongoose);
+var control = require('./controller');
+
+
+
 app.get('/', function(req, res){
 
   request(config.sitio, function(error, response, html){
@@ -35,11 +41,10 @@ app.get('/', function(req, res){
 
         json.skill = obj;
 
-        datos.push(json);
+        control.registro(json);
+
         console.log(count);
       })
-
-      res.send(datos);
 
     }else {
 
@@ -47,8 +52,18 @@ app.get('/', function(req, res){
 
     }
 
+    res.status(200).send({mensaje:'holiwis'});
+
   })
 
+})
+
+mongoose.connect('mongodb://localhost/scrapping',function(err,res){
+  if (err) {
+    console.log('Error de conexion a mongodb');
+  }else{
+    console.log('Conectado a mongodb');
+  }
 })
 
 app.listen(config.puerto);
