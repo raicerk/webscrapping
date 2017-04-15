@@ -1,8 +1,54 @@
 var mongoose = require('mongoose');
-
 var User = mongoose.model('jobdata');
-
+var cheerio = require('cheerio');
 var config = require('./config');
+var request = require('request');
+const moment = require('moment');
+
+exports.scrapping = function(){
+
+    console.log("Scrapping iniciado.");
+
+    request(config.sitio, function(error, response, html){
+
+      let datos = [];
+
+      if(!error){
+
+        var $ = cheerio.load(html);
+
+        var count = 1;
+
+        $('.job').filter(function(){
+
+          count = count+1;
+
+          var data = $(this);
+          let obj = [];
+          let json = {};
+
+          json.link = data[0].children[0].next.attribs.href;
+          json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '')
+
+          let me = data.find('.ellipsis .tag');
+
+          for (var i = 0; i < me.length; i++) {
+            obj.push(me[i].children[0].data);
+          }
+
+          json.skill = obj;
+
+          exports.registro(json);
+
+        })
+        console.log("Scrapping finalizado.");
+      }else {
+        return false;
+      }
+      return true;
+    })
+
+}
 
 exports.registro = function(req) {
 
@@ -15,11 +61,9 @@ exports.registro = function(req) {
     });
 
     data.save(function(err,res){
-      if (err) {
-        console.log("se ha producido un error al almacenar los datos");
-      }else{
-        console.log("Almacenado correctamente");
-        return true;
+      if (!err) {
+        console.log("Almacenado correctamente"+res._id);
+        //console.log("se ha producido un error al almacenar los datos");
       }
     });
   }catch (e) {
@@ -50,4 +94,20 @@ exports.ConsultaDatos = function(req,res){
   User.mapReduce(o, function (err, results) {
     res.status(200).jsonp(results);
   });
+}
+
+exports.Programable = function(){
+  var nuevaHora = moment().add(5,'seconds').format("YYYY-MM-DD HH:mm:ss");
+  console.log(`La ejecución sera el ${nuevaHora}`);
+  setInterval(function(){
+    var hora = moment().format("YYYY-MM-DD HH:mm:ss");
+    if (hora == nuevaHora) {
+      console.log(`Ejecución ${nuevaHora}`);
+      exports.scrapping();
+      nuevaHora = moment(new Date(nuevaHora));
+      nuevaHora.add(Math.floor(Math.random() * (Math.floor(config.minutosMaximos) - Math.ceil(config.minutosMinimos) + 1)) + Math.ceil(config.minutosMinimos), 'minutes');
+      nuevaHora = nuevaHora.format("YYYY-MM-DD HH:mm:ss");
+      console.log(`Proxima ejecución ${nuevaHora}`);
+    }
+  }, 1000);
 }
