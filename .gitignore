@@ -1,4 +1,4 @@
 # dependencies
 /node_modules
 config.js
-firebase-admin.js
+firebase-admin.json
