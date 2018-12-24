@@ -1,92 +1,96 @@
-var mongoose = require('mongoose');
-var User = mongoose.model('jobdata');
 var cheerio = require('cheerio');
 var config = require('./config');
 var request = require('request');
 const moment = require('moment');
+var admin = require("firebase-admin");
+var serviceAccount = require("firebase-admin.json");
 
-exports.scrapping = function(){
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: config.databaseURL
+});
 
-    console.log("Scrapping iniciado.");
+exports.scrapping = function () {
 
-    request(config.sitio, function(error, response, html){
+  console.log("Scrapping iniciado.");
 
-      let datos = [];
+  request(config.sitio, function (error, response, html) {
 
-      if(!error){
+    let datos = [];
 
-        var $ = cheerio.load(html);
+    if (!error) {
 
-        var count = 1;
+      var $ = cheerio.load(html);
 
-        $('.job').filter(function(){
+      var count = 1;
 
-          count = count+1;
+      $('.job').filter(function () {
 
-          var data = $(this);
-          let obj = [];
-          let json = {};
+        count = count + 1;
 
-          json.link = data[0].children[0].next.attribs.href;
-          json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '')
+        var data = $(this);
+        let obj = [];
+        let json = {};
 
-          let me = data.find('.ellipsis .tag');
+        json.link = data[0].children[0].next.attribs.href;
+        json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '')
 
-          for (var i = 0; i < me.length; i++) {
-            obj.push(me[i].children[0].data);
-          }
+        let me = data.find('.ellipsis .tag');
 
-          json.skill = obj;
+        for (var i = 0; i < me.length; i++) {
+          obj.push(me[i].children[0].data);
+        }
 
-          exports.registro(json);
+        json.skill = obj;
 
-        })
-        console.log("Scrapping finalizado.");
-      }else {
-        return false;
-      }
-      return true;
-    })
+        exports.registro(json);
+
+      })
+      console.log("Scrapping finalizado.");
+    } else {
+      return false;
+    }
+    return true;
+  })
 
 }
 
-exports.registro = function(req) {
+exports.registro = function (req) {
 
   try {
 
-    var data = new User({
-      link  : req.link,
-      fecha : req.fecha,
-      skill : req.skill
-    });
+    // var data = new User({
+    //   link: req.link,
+    //   fecha: req.fecha,
+    //   skill: req.skill
+    // });
 
-    data.save(function(err,res){
-      if (!err) {
-        console.log("Almacenado correctamente"+res._id);
-        //console.log("se ha producido un error al almacenar los datos");
-      }
-    });
-  }catch (e) {
+    // data.save(function (err, res) {
+    //   if (!err) {
+    //     console.log("Almacenado correctamente" + res._id);
+    //   }
+    // });
+  } catch (e) {
     console.log(e);
     return false;
   }
 };
 
-exports.ConsultaDatos = function(req,res){
+exports.ConsultaDatos = function (req, res) {
   var o = {};
-  o.map = function(){
-    var datos = JSON.stringify(this.skill).replace(/[\"\]\[]/g,'');
+  o.map = function () {
+    var datos = JSON.stringify(this.skill).replace(/[\"\]\[]/g, '');
     var skill = datos.split(',');
-    for(i in skill){
-        emit(skill[i],1);
+    for (i in skill) {
+      emit(skill[i], 1);
     }
   }
 
-  o.reduce = function(key,values){
+  o.reduce = function (key, values) {
 
     var count = 0;
-    for(i in values){
-        count += values[i];
+    for (i in values) {
+      count += values[i];
     }
     return count;
   }
@@ -96,10 +100,10 @@ exports.ConsultaDatos = function(req,res){
   });
 }
 
-exports.Programable = function(){
-  var nuevaHora = moment().add(5,'seconds').format("YYYY-MM-DD HH:mm:ss");
+exports.Programable = function () {
+  var nuevaHora = moment().add(5, 'seconds').format("YYYY-MM-DD HH:mm:ss");
   console.log(`La ejecución sera el ${nuevaHora}`);
-  setInterval(function(){
+  setInterval(function () {
     var hora = moment().format("YYYY-MM-DD HH:mm:ss");
     if (hora == nuevaHora) {
       console.log(`Ejecución ${nuevaHora}`);

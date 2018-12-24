@@ -22,16 +22,9 @@
   "homepage": "https://github.com/raicerk/webscrapping#readme",
   "dependencies": {
     "cheerio": "^0.22.0",
-    "cookie-session": "^2.0.0-beta.1",
-    "cors": "^2.8.3",
+    "cors": "^2.8.5",
     "express": "^4.15.2",
-    "frameguard": "^3.0.0",
-    "fs": "0.0.1-security",
-    "helmet": "^3.5.0",
-    "hsts": "^2.0.0",
-    "https": "^1.0.0",
     "moment": "^2.18.1",
-    "mongoose": "^4.9.1",
     "request": "^2.81.0"
   }
 }
