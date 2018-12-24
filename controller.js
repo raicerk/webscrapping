@@ -3,7 +3,7 @@ var config = require('./config');
 var request = require('request');
 const moment = require('moment');
 var admin = require("firebase-admin");
-var serviceAccount = require("firebase-admin.json");
+var serviceAccount = require("./firebase-admin.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -57,14 +57,21 @@ exports.scrapping = function () {
 
 exports.registro = function (req) {
 
+  let ms = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"].indexOf(req.fecha.split(' ')[0]) + 1;
+
+  let dia = req.fecha.split(' ')[1];
+  let mes = ms < 10 ? `0${ms}` : ms;
+  let ano = moment().year();
+
   try {
 
-    // var data = new User({
-    //   link: req.link,
-    //   fecha: req.fecha,
-    //   skill: req.skill
-    // });
+    var data = {
+      link: req.link,
+      fecha: `${ano}-${mes}-${dia}`,
+      skill: req.skill
+    };
 
+    console.log(data)
     // data.save(function (err, res) {
     //   if (!err) {
     //     console.log("Almacenado correctamente" + res._id);
@@ -72,7 +79,6 @@ exports.registro = function (req) {
     // });
   } catch (e) {
     console.log(e);
-    return false;
   }
 };
 
