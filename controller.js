@@ -74,7 +74,7 @@ exports.registro = function (req) {
       pais: 'CL',
       link: `${config.dominiositio}${req.link}`,
       fecha: `${ano}-${mes}-${dia}`,
-      skill: req.skill      
+      skill: req.skill
     };
 
     db.collection('programacion').doc(id).set(data);
@@ -85,26 +85,37 @@ exports.registro = function (req) {
 };
 
 exports.ConsultaDatos = function (req, res) {
-  var o = {};
-  o.map = function () {
-    var datos = JSON.stringify(this.skill).replace(/[\"\]\[]/g, '');
-    var skill = datos.split(',');
-    for (i in skill) {
-      emit(skill[i], 1);
+
+  db.collection("programacion")
+  .orderBy("fecha", "desc")
+  .get()
+  .then((querySnapshot) => {
+    let arr = [];
+    querySnapshot.forEach(function (doc) {
+      var obj = JSON.parse(JSON.stringify(doc.data()));
+      arr.push(obj);
+    });
+
+    if (arr.length > 0) {
+
+      var nuevo = [];
+
+      arr.forEach(element => {
+        nuevo.push(element.skill[0]);
+      });
+
+      var count = {};
+      nuevo.forEach(function (i) { count[i] = (count[i] || 0) + 1; });
+
+      res.status(200).jsonp([count]);
+
+    } else {
+      res.status(500).jsonp({ results: 'error' });
     }
-  }
-
-  o.reduce = function (key, values) {
-
-    var count = 0;
-    for (i in values) {
-      count += values[i];
-    }
-    return count;
-  }
-
-  User.mapReduce(o, function (err, results) {
-    res.status(200).jsonp(results);
+  })
+  .catch((error) => {
+    console.log(error)
+    res.status(500).jsonp({ results: 'error' });
   });
 }
 
