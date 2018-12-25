@@ -2,8 +2,9 @@
   "name": "scrapping",
   "version": "1.0.0",
   "description": "Aprendiendo Web-Scrapping con nodejs",
-  "main": "main.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "iron main.js"
   },
   "repository": {
@@ -12,7 +13,11 @@
   },
   "keywords": [
     "nodejs",
-    "node"
+    "node",
+    "webscrapping",
+    "scrapping",
+    "gcloud",
+    "firebase"
   ],
   "author": "Juan Mora",
   "license": "MIT",
