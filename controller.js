@@ -6,9 +6,13 @@ var admin = require("firebase-admin");
 var serviceAccount = require("./firebase-admin.json");
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: config.databaseURL
+  credential: admin.credential.cert(serviceAccount)
 });
+
+var db = admin.firestore();
+db.settings({
+  timestampsInSnapshots: true
+})
 
 exports.scrapping = function () {
 
@@ -62,21 +66,19 @@ exports.registro = function (req) {
   let dia = req.fecha.split(' ')[1];
   let mes = ms < 10 ? `0${ms}` : ms;
   let ano = moment().year();
+  let id = req.link.split('/')[3];
 
   try {
 
     var data = {
-      link: req.link,
+      pais: 'CL',
+      link: `${config.dominiositio}${req.link}`,
       fecha: `${ano}-${mes}-${dia}`,
-      skill: req.skill
+      skill: req.skill      
     };
 
-    console.log(data)
-    // data.save(function (err, res) {
-    //   if (!err) {
-    //     console.log("Almacenado correctamente" + res._id);
-    //   }
-    // });
+    db.collection('programacion').doc(id).set(data);
+
   } catch (e) {
     console.log(e);
   }
