@@ -87,36 +87,38 @@ exports.registro = function (req) {
 exports.ConsultaDatos = function (req, res) {
 
   db.collection("programacion")
-  .orderBy("fecha", "desc")
-  .get()
-  .then((querySnapshot) => {
-    let arr = [];
-    querySnapshot.forEach(function (doc) {
-      var obj = JSON.parse(JSON.stringify(doc.data()));
-      arr.push(obj);
-    });
-
-    if (arr.length > 0) {
-
-      var nuevo = [];
-
-      arr.forEach(element => {
-        nuevo.push(element.skill[0]);
+    .orderBy("fecha", "desc")
+    .get()
+    .then((querySnapshot) => {
+      let arr = [];
+      querySnapshot.forEach(function (doc) {
+        var obj = JSON.parse(JSON.stringify(doc.data()));
+        arr.push(obj);
       });
 
-      var count = {};
-      nuevo.forEach(function (i) { count[i] = (count[i] || 0) + 1; });
+      if (arr.length > 0) {
 
-      res.status(200).jsonp([count]);
+        var nuevo = [];
 
-    } else {
+        arr.forEach(element => {
+          for (i in element.skill) {
+            nuevo.push(element.skill[i]);
+          }
+        });
+
+        var count = {};
+        nuevo.forEach(function (i) { count[i] = (count[i] || 0) + 1; });
+
+        res.status(200).jsonp([count]);
+
+      } else {
+        res.status(500).jsonp({ results: 'error' });
+      }
+    })
+    .catch((error) => {
+      console.log(error)
       res.status(500).jsonp({ results: 'error' });
-    }
-  })
-  .catch((error) => {
-    console.log(error)
-    res.status(500).jsonp({ results: 'error' });
-  });
+    });
 }
 
 exports.Programable = function () {
