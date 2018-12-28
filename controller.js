@@ -12,15 +12,13 @@ admin.initializeApp({
 var db = admin.firestore();
 db.settings({
   timestampsInSnapshots: true
-})
+});
 
 exports.scrapping = function () {
 
   console.log("Scrapping iniciado.");
 
   request(config.sitio, function (error, response, html) {
-
-    let datos = [];
 
     if (!error) {
 
@@ -37,7 +35,7 @@ exports.scrapping = function () {
         let json = {};
 
         json.link = data[0].children[0].next.attribs.href;
-        json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '')
+        json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '');
 
         let me = data.find('.ellipsis .tag');
 
@@ -49,15 +47,14 @@ exports.scrapping = function () {
 
         exports.registro(json);
 
-      })
+      });
       console.log("Scrapping finalizado.");
     } else {
       return false;
     }
     return true;
-  })
-
-}
+  });
+};
 
 exports.registro = function (req) {
 
@@ -101,7 +98,7 @@ exports.ConsultaDatos = function (req, res) {
         var nuevo = [];
 
         arr.forEach(element => {
-          for (i in element.skill) {
+          for (const i in element.skill) {
             nuevo.push(element.skill[i]);
           }
         });
@@ -116,10 +113,10 @@ exports.ConsultaDatos = function (req, res) {
       }
     })
     .catch((error) => {
-      console.log(error)
+      console.log(error);
       res.status(500).jsonp({ results: 'error' });
     });
-}
+};
 
 exports.Programable = function () {
   var nuevaHora = moment().add(5, 'seconds').format("YYYY-MM-DD HH:mm:ss");
@@ -135,4 +132,4 @@ exports.Programable = function () {
       console.log(`Proxima ejecución ${nuevaHora}`);
     }
   }, 1000);
-}
+};
