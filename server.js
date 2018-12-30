@@ -50,6 +50,12 @@ rutas.get('/datos', function (req, res) {
   control.ConsultaDatos(req, res);
 });
 
+//Ruta de acceso a los datos por fecha
+rutas.get('/datosfecha', function (req, res) {
+  control.ConsultaDatosPorFecha(req, res);
+});
+
+
 //Inicialización de las rutas
 app.use(rutas)
 
