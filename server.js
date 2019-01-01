@@ -2,6 +2,7 @@
 let express = require('express');
 let bodyParser = require('body-parser');
 let cors = require('cors');
+const cache = require('./util/cache-middleware');
 
 //Configuración de la API
 require('events').EventEmitter.defaultMaxListeners = Infinity;
@@ -51,7 +52,7 @@ rutas.get('/datos', function (req, res) {
 });
 
 //Ruta de acceso a los datos por fecha
-rutas.get('/datosfecha', function (req, res) {
+rutas.get('/datosfecha', cache(30), function (req, res) {
   control.ConsultaDatosPorFecha(req, res);
 });
 
@@ -61,6 +62,6 @@ app.use(rutas);
 
 // Inicialización del servicio
 app.listen(config.puerto, function() {
-  control.Programable();
+  /// control.Programable();
   console.log(`Node server ejecutandose en http://${config.dominio}:${config.puerto}`);
 });

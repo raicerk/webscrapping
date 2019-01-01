@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:dev": "nodemon server.js --debug",
     "test": "iron main.js"
   },
   "repository": {
@@ -34,6 +35,8 @@
     "request": "^2.81.0"
   },
   "devDependencies": {
-    "eslint": "^5.11.1"
+    "eslint": "^5.11.1",
+    "memory-cache": "^0.2.0",
+    "nodemon": "^1.18.9"
   }
 }
