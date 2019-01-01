@@ -4,6 +4,8 @@ var request = require('request');
 const moment = require('moment');
 var admin = require("firebase-admin");
 var serviceAccount = require("./firebase-admin.json");
+const NodeCache = require("node-cache");
+const Cache = new NodeCache();
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -56,6 +58,35 @@ exports.scrapping = function () {
     }
     return true;
   })
+
+  db.collection("programacion")
+    .get()
+    .then((querySnapshot) => {
+      let arr = [];
+      querySnapshot.forEach(function (doc) {
+        var obj = JSON.parse(JSON.stringify(doc.data()));
+        arr.push(obj);
+      });
+
+      if (arr.length > 0) {
+
+        var nuevo = [];
+
+        arr.forEach(element => {
+          for (i in element.skill) {
+            nuevo.push(element.skill[i]);
+          }
+        });
+
+        cache.set('dataDB', arr);
+
+      } else {
+        res.status(500).jsonp({ results: 'error' });
+      }
+    })
+    .catch((error) => {
+      console.log(error)
+    });
 
 }
 
