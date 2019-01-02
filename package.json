@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "start:dev": "nodemon server.js --debug",
+    "debug": "nodemon --ext js --inspect server.js",
     "test": "iron main.js"
   },
   "repository": {
