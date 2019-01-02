@@ -47,7 +47,7 @@ rutas.get('/', function(req, res) {
 });
 
 //Ruta de acceso a los datos
-rutas.get('/datos', function (req, res) {
+rutas.get('/datos', cache(60), function (req, res) {
   control.ConsultaDatos(req, res);
 });
 
