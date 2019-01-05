@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 //Inyección de dependencias
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -44,3 +45,13 @@ app.listen(config.puerto, function() {
   /// control.Programable();
   console.log(`Node server ejecutandose en http://${config.dominio}:${config.puerto}`);
 });
+=======
+//Configuración
+const config = require('./config');
+
+//Importación de controladores
+const control = require('./controller');
+
+//Ejecuta el scrapping y se autoprograma
+control.Programable();
+>>>>>>> develop

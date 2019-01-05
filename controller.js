@@ -14,6 +14,10 @@ db.settings({
   timestampsInSnapshots: true
 });
 
+/**
+ * Lee sitio web y tabula información
+ * return boolean
+ */
 exports.scrapping = function () {
 
   console.log("Scrapping iniciado.");
@@ -56,6 +60,10 @@ exports.scrapping = function () {
   });
 };
 
+/**
+ * Almacena información en db de scrapping
+ * return void
+ */
 exports.registro = function (req) {
 
   let ms = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"].indexOf(req.fecha.split(' ')[0]) + 1;
@@ -81,43 +89,10 @@ exports.registro = function (req) {
   }
 };
 
-exports.ConsultaDatos = function (req, res) {
-
-  db.collection("programacion")
-    .orderBy("fecha", "desc")
-    .get()
-    .then((querySnapshot) => {
-      let arr = [];
-      querySnapshot.forEach(function (doc) {
-        var obj = JSON.parse(JSON.stringify(doc.data()));
-        arr.push(obj);
-      });
-
-      if (arr.length > 0) {
-
-        var nuevo = [];
-
-        arr.forEach(element => {
-          for (const i in element.skill) {
-            nuevo.push(element.skill[i]);
-          }
-        });
-
-        var count = {};
-        nuevo.forEach(function (i) { count[i] = (count[i] || 0) + 1; });
-
-        res.status(200).jsonp([count]);
-
-      } else {
-        res.status(500).jsonp({ results: 'error' });
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-      res.status(500).jsonp({ results: 'error' });
-    });
-};
-
+/**
+ * Metodo recursivo para autoprogramar la ejecución del scrapping de manera aleatoria con sistema de minutos maximos y minimos.
+ * return void
+ */
 exports.Programable = function () {
   var nuevaHora = moment().add(5, 'seconds').format("YYYY-MM-DD HH:mm:ss");
   console.log(`La ejecución sera el ${nuevaHora}`);
@@ -132,6 +107,7 @@ exports.Programable = function () {
       console.log(`Proxima ejecución ${nuevaHora}`);
     }
   }, 1000);
+<<<<<<< HEAD
 };
 
 exports.ConsultaDatosPorFecha = function (req, res) {
@@ -187,3 +163,6 @@ exports.ConsultaDatosPorFecha = function (req, res) {
       res.status(500).jsonp({ results: 'error' });
     });
 };
+=======
+};
+>>>>>>> develop

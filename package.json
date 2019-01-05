@@ -28,15 +28,12 @@
   "homepage": "https://github.com/raicerk/webscrapping#readme",
   "dependencies": {
     "cheerio": "^0.22.0",
-    "cors": "^2.8.5",
-    "express": "^4.15.2",
     "firebase-admin": "^6.4.0",
     "moment": "^2.18.1",
     "request": "^2.81.0"
   },
   "devDependencies": {
     "eslint": "^5.11.1",
-    "memory-cache": "^0.2.0",
     "nodemon": "^1.18.9"
   }
 }
