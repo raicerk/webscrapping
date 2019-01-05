@@ -1,20 +1,14 @@
 //Inyección de dependencias
-let express = require('express');
-let bodyParser = require('body-parser');
-let cors = require('cors');
-const cache = require('./util/cache-middleware');
-
-//Configuración de la API
-require('events').EventEmitter.defaultMaxListeners = Infinity;
-
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const registerRoutes = require('./routes');
 //Configuración
 const config = require('./config');
-
-//Importación de controladores
-const control = require('./controller');
-
 //Inicialización de la aplicación
-let app = express();
+const app = express();
+//Configuración de la API
+require('events').EventEmitter.defaultMaxListeners = Infinity;
 
 //Configuración de nuestra API
 app.use(bodyParser.json());
@@ -36,29 +30,14 @@ app.use(function (req, res, next) {
   next();
 });
 
-//Iniciamos las rutas de nuestro servidor/API
-let rutas = express.Router();
-
 //Ruta de bienvenida
-rutas.get('/', function(req, res) {
+app.get('/', function(req, res) {
   res.send({
-    'Mensaje': 'Bienvenido a la API REST de datos estadisticos informaticos'
+    'message': 'Bienvenido a la API REST de datos estadísticos informáticos'
   });
 });
 
-//Ruta de acceso a los datos
-rutas.get('/datos', cache(60), function (req, res) {
-  control.ConsultaDatos(req, res);
-});
-
-//Ruta de acceso a los datos por fecha
-rutas.get('/datosfecha', cache(30), function (req, res) {
-  control.ConsultaDatosPorFecha(req, res);
-});
-
-
-//Inicialización de las rutas
-app.use(rutas);
+registerRoutes(app);
 
 // Inicialización del servicio
 app.listen(config.puerto, function() {
