@@ -1,7 +1,7 @@
 {
-  "name": "scrapping",
+  "name": "apiestadisticas",
   "version": "1.0.0",
-  "description": "Aprendiendo Web-Scrapping con nodejs",
+  "description": "API con nodejs sobre estadisticas",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -10,29 +10,24 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/raicerk/webscrapping.git"
+    "url": "git+https://github.com/pgramadores/APIEstadisticas"
   },
   "keywords": [
     "nodejs",
     "node",
-    "webscrapping",
-    "scrapping",
     "gcloud",
     "firebase"
   ],
   "author": "Juan Mora",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/raicerk/webscrapping/issues"
+    "url": "https://github.com/pgramadores/APIEstadisticas/issues"
   },
-  "homepage": "https://github.com/raicerk/webscrapping#readme",
+  "homepage": "https://github.com/pgramadores/APIEstadisticas#readme",
   "dependencies": {
-    "cheerio": "^0.22.0",
     "cors": "^2.8.5",
     "express": "^4.15.2",
-    "firebase-admin": "^6.4.0",
-    "moment": "^2.18.1",
-    "request": "^2.81.0"
+    "firebase-admin": "^6.4.0"
   },
   "devDependencies": {
     "eslint": "^5.11.1",

@@ -41,6 +41,5 @@ registerRoutes(app);
 
 // Inicialización del servicio
 app.listen(config.puerto, function() {
-  /// control.Programable();
   console.log(`Node server ejecutandose en http://${config.dominio}:${config.puerto}`);
 });
