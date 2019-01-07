@@ -83,7 +83,7 @@ exports.registro = function (req) {
       clasificacion: req.clasificacion
     };
 
-    db.collection('programacion').doc(id).set(data);
+    db.collection('laboral').doc(id).set(data);
 
   } catch (e) {
     console.log(e);
