@@ -30,7 +30,8 @@
     "cheerio": "^0.22.0",
     "firebase-admin": "^6.4.0",
     "moment": "^2.18.1",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "request-promise": "^4.2.2"
   },
   "devDependencies": {
     "eslint": "^5.11.1",

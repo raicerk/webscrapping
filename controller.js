@@ -1,9 +1,9 @@
-var cheerio = require('cheerio');
-var config = require('./config');
-var request = require('request');
+const serviceAccount = require("./firebase-admin.json");
+const config = require('./config');
+const util = require('./util');
+const cheerio = require('cheerio');
 const moment = require('moment');
-var admin = require("firebase-admin");
-var serviceAccount = require("./firebase-admin.json");
+const admin = require("firebase-admin");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -22,11 +22,12 @@ exports.scrapping = function () {
 
   console.log("Scrapping iniciado.");
 
-  request(config.sitio, function (error, response, html) {
+  Object.keys(config.sitios)
+    .forEach(async function eachKey(clasificacion) {
 
-    if (!error) {
+      var datito = await util.obtieneHTML(config.sitios[clasificacion]);
 
-      var $ = cheerio.load(html);
+      var $ = cheerio.load(datito);
 
       var count = 1;
 
@@ -40,6 +41,7 @@ exports.scrapping = function () {
 
         json.link = data[0].children[0].next.attribs.href;
         json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '');
+        json.clasificacion = clasificacion;
 
         let me = data.find('.ellipsis .tag');
 
@@ -52,16 +54,15 @@ exports.scrapping = function () {
         exports.registro(json);
 
       });
-      console.log("Scrapping finalizado.");
-    } else {
-      return false;
-    }
-    return true;
-  });
+    })
+
+  console.log("Scrapping finalizado.");
+
+
 };
 
 /**
- * Almacena información en db de scrapping
+ * Almacena inform ación en db de scrapping
  * return void
  */
 exports.registro = function (req) {
@@ -70,16 +71,16 @@ exports.registro = function (req) {
 
   let dia = req.fecha.split(' ')[1];
   let mes = ms < 10 ? `0${ms}` : ms;
-  let ano = moment().year();
+  let ano = ms >= 2 ? 2018 : moment().year();
   let id = req.link.split('/')[3];
 
   try {
-
     var data = {
       pais: 'CL',
       link: `${config.dominiositio}${req.link}`,
       fecha: `${ano}-${mes}-${dia}`,
-      skill: req.skill
+      skill: req.skill,
+      clasificacion: req.clasificacion
     };
 
     db.collection('programacion').doc(id).set(data);
