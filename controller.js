@@ -4,6 +4,7 @@ const util = require('./util');
 const cheerio = require('cheerio');
 const moment = require('moment');
 const admin = require("firebase-admin");
+var rp = require('request-promise');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -18,53 +19,64 @@ db.settings({
  * Lee sitio web y tabula información
  * return boolean
  */
-exports.scrapping = function () {
+exports.scrapping = async function () {
 
-  console.log("Scrapping iniciado.");
+  try {
+    var datos = config.sitios;
 
-  var datos = config.sitios;
+    for (i in datos) {
 
-  for (i in datos) {
+      var pais = datos[i].pais;
+      var dominio = datos[i].dominiositio;
 
-    var pais = datos[i].pais;
-    var dominio = datos[i].dominiositio;
+      Object.keys(datos[i].sitios).forEach(async function eachKey(clasificacion) {
 
-    Object.keys(datos[i].sitios).forEach(async function eachKey(clasificacion) {
+        var options = {
+          uri: datos[i].sitios[clasificacion],
+          transform: function (body) {
+            return cheerio.load(body);
+          }
+        };
 
-      var datito = await util.obtieneHTML(datos[i].sitios[clasificacion]);
+        rp(options).then(function ($) {
 
-      var $ = cheerio.load(datito);
+          var count = 1;
 
-      var count = 1;
+          $('.job').filter(async function () {
 
-      $('.job').filter(function () {
+            count = count + 1;
 
-        count = count + 1;
+            var data = $(this);
+            let obj = [];
+            let json = {};
 
-        var data = $(this);
-        let obj = [];
-        let json = {};
+            json.link = data[0].children[0].next.attribs.href;
+            json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '');
+            json.clasificacion = clasificacion;
+            json.pais = pais;
+            json.dominio = dominio;
 
-        json.link = data[0].children[0].next.attribs.href;
-        json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '');
-        json.clasificacion = clasificacion;
-        json.pais = pais;
-        json.dominio = dominio;
+            let me = data.find('.ellipsis .tag');
 
-        let me = data.find('.ellipsis .tag');
+            for (var i = 0; i < me.length; i++) {
+              obj.push(me[i].children[0].data);
+            }
 
-        for (var i = 0; i < me.length; i++) {
-          obj.push(me[i].children[0].data);
-        }
+            json.skill = obj;
 
-        json.skill = obj;
+            var res = await exports.registro(json);
+            console.log(`${res}:${count}`);
 
-        await exports.registro(json);
+          });
 
-      });
-    })
 
-    console.log("Scrapping finalizado.");
+        }).catch(function (err) {
+          console.log("error with cherio")
+        });
+      })
+    }
+  } catch (error) {
+    console.log("error ssss");
   }
 
 };
