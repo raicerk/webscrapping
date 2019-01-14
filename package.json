@@ -30,6 +30,7 @@
     "cheerio": "^0.22.0",
     "firebase-admin": "^6.4.0",
     "moment": "^2.18.1",
+    "postman-request": "^2.88.1-postman.5",
     "request": "^2.81.0",
     "request-promise": "^4.2.2"
   },

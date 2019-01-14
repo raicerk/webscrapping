@@ -1,15 +1,20 @@
-const serviceAccount = require("./firebase-admin.json");
-const config = require('./config');
-const util = require('./util');
+const request = require('postman-request');
 const cheerio = require('cheerio');
 const moment = require('moment');
 const admin = require("firebase-admin");
-var rp = require('request-promise');
+const serviceAccount = require("./firebase-admin.json");
+const config = require('./config');
 
+/**
+ * Carga de configuracion para firebase
+ */
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
+/**
+ * Carga de configuracion de firestore de firebase
+ */
 var db = admin.firestore();
 db.settings({
   timestampsInSnapshots: true
@@ -26,52 +31,48 @@ exports.scrapping = async function () {
 
     for (i in datos) {
 
-      var pais = datos[i].pais;
-      var dominio = datos[i].dominiositio;
+      Object.keys(datos[i].sitios).forEach(function eachKey(clasificacion) {
 
-      Object.keys(datos[i].sitios).forEach(async function eachKey(clasificacion) {
+        var pais = datos[i].pais;
+        var dominio = datos[i].dominiositio;
+        var url = datos[i].sitios[clasificacion];
 
-        var options = {
-          uri: datos[i].sitios[clasificacion],
-          transform: function (body) {
-            return cheerio.load(body);
+        request(url, function (error, response, body) {
+
+          try {
+            var $ = cheerio.load(body);
+
+            var count = 1;
+
+            $('.job').filter(function () {
+
+              count = count + 1;
+
+              var data = $(this);
+              let obj = [];
+              let json = {};
+
+              json.link = data[0].children[0].next.attribs.href;
+              json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '');
+              json.clasificacion = clasificacion;
+              json.pais = pais;
+              json.dominio = dominio;
+
+              let me = data.find('.ellipsis .tag');
+
+              for (var i = 0; i < me.length; i++) {
+                obj.push(me[i].children[0].data);
+              }
+
+              json.skill = obj;
+
+              exports.registro(json);
+
+            });
+          } catch (error) {
+            console.error(error);
           }
-        };
 
-        rp(options).then(function ($) {
-
-          var count = 1;
-
-          $('.job').filter(async function () {
-
-            count = count + 1;
-
-            var data = $(this);
-            let obj = [];
-            let json = {};
-
-            json.link = data[0].children[0].next.attribs.href;
-            json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '');
-            json.clasificacion = clasificacion;
-            json.pais = pais;
-            json.dominio = dominio;
-
-            let me = data.find('.ellipsis .tag');
-
-            for (var i = 0; i < me.length; i++) {
-              obj.push(me[i].children[0].data);
-            }
-
-            json.skill = obj;
-
-            var res = await exports.registro(json);
-            console.log(`${res}:${count}`);
-
-          });
-
-
-        }).catch(function (err) {
-          console.log("error with cherio")
         });
       })
     }
@@ -82,7 +83,7 @@ exports.scrapping = async function () {
 };
 
 /**
- * Almacena inform ación en db de scrapping
+ * Almacena información en db de scrapping
  * return Promise
  */
 exports.registro = function (req) {

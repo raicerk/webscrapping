@@ -18,3 +18,9 @@ var obtieneHTML = module.exports.obtieneHTML = function (sitio) {
 var max = module.exports.max = function (saludo) {
     return "holisi" + saludo;
 }
+
+module.exports.asyncForEach = async function (array, callback) {
+    for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array);
+    }
+}
