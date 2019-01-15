@@ -23,7 +23,7 @@ exports.scrapping = function () {
   console.log("Scrapping iniciado.");
 
   var datos = config.sitios;
-  
+
 
   for (i in datos) {
 
@@ -61,7 +61,7 @@ exports.scrapping = function () {
 
           json.skill = obj;
 
-          exports.registro(json);
+          await exports.registro(json);
 
         });
       })
@@ -76,28 +76,35 @@ exports.scrapping = function () {
  * return void
  */
 exports.registro = function (req) {
+  return new Promise((resolve, reject) => {
+    let ms = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"].indexOf(req.fecha.split(' ')[0]) + 1;
 
-  let ms = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"].indexOf(req.fecha.split(' ')[0]) + 1;
+    let dia = req.fecha.split(' ')[1];
+    let mes = ms < 10 ? `0${ms}` : ms;
+    let ano = ms >= 2 ? 2018 : moment().year();
+    let id = req.pais + ":" + req.link.split('/')[3];
 
-  let dia = req.fecha.split(' ')[1];
-  let mes = ms < 10 ? `0${ms}` : ms;
-  let ano = ms >= 2 ? 2018 : moment().year();
-  let id = req.pais+":"+req.link.split('/')[3];
+    try {
+      var data = {
+        pais: req.pais,
+        link: `${req.dominio}${req.link}`,
+        fecha: `${ano}-${mes}-${dia}`,
+        skill: req.skill,
+        clasificacion: req.clasificacion
+      };
 
-  try {
-    var data = {
-      pais: req.pais,
-      link: `${req.dominio}${req.link}`,
-      fecha: `${ano}-${mes}-${dia}`,
-      skill: req.skill,
-      clasificacion: req.clasificacion
-    };
+      var data = db.collection('laboral').doc(id).set(data);
+      if(data){
+        resolve(true);
+      }else{
+        resolve(false);
+      }
 
-    db.collection('laboral').doc(id).set(data);
-
-  } catch (e) {
-    console.log(e);
-  }
+    } catch (e) {
+      console.log(e);
+      reject(e);
+    }
+  });
 };
 
 /**
