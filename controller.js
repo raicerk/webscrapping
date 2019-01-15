@@ -24,47 +24,45 @@ exports.scrapping = function () {
 
   var datos = config.sitios;
 
-
   for (i in datos) {
 
     var pais = datos[i].pais;
     var dominio = datos[i].dominiositio;
 
-    Object.keys(datos[i].sitios)
-      .forEach(async function eachKey(clasificacion) {
+    Object.keys(datos[i].sitios).forEach(async function eachKey(clasificacion) {
 
-        var datito = await util.obtieneHTML(datos[i].sitios[clasificacion]);
+      var datito = await util.obtieneHTML(datos[i].sitios[clasificacion]);
 
-        var $ = cheerio.load(datito);
+      var $ = cheerio.load(datito);
 
-        var count = 1;
+      var count = 1;
 
-        $('.job').filter(function () {
+      $('.job').filter(function () {
 
-          count = count + 1;
+        count = count + 1;
 
-          var data = $(this);
-          let obj = [];
-          let json = {};
+        var data = $(this);
+        let obj = [];
+        let json = {};
 
-          json.link = data[0].children[0].next.attribs.href;
-          json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '');
-          json.clasificacion = clasificacion;
-          json.pais = pais;
-          json.dominio = dominio;
+        json.link = data[0].children[0].next.attribs.href;
+        json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '');
+        json.clasificacion = clasificacion;
+        json.pais = pais;
+        json.dominio = dominio;
 
-          let me = data.find('.ellipsis .tag');
+        let me = data.find('.ellipsis .tag');
 
-          for (var i = 0; i < me.length; i++) {
-            obj.push(me[i].children[0].data);
-          }
+        for (var i = 0; i < me.length; i++) {
+          obj.push(me[i].children[0].data);
+        }
 
-          json.skill = obj;
+        json.skill = obj;
 
-          await exports.registro(json);
+        await exports.registro(json);
 
-        });
-      })
+      });
+    })
 
     console.log("Scrapping finalizado.");
   }
@@ -73,10 +71,11 @@ exports.scrapping = function () {
 
 /**
  * Almacena inform ación en db de scrapping
- * return void
+ * return Promise
  */
 exports.registro = function (req) {
   return new Promise((resolve, reject) => {
+
     let ms = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"].indexOf(req.fecha.split(' ')[0]) + 1;
 
     let dia = req.fecha.split(' ')[1];
@@ -85,6 +84,7 @@ exports.registro = function (req) {
     let id = req.pais + ":" + req.link.split('/')[3];
 
     try {
+
       var data = {
         pais: req.pais,
         link: `${req.dominio}${req.link}`,
@@ -93,10 +93,9 @@ exports.registro = function (req) {
         clasificacion: req.clasificacion
       };
 
-      var data = db.collection('laboral').doc(id).set(data);
-      if(data){
+      if (db.collection('laboral').doc(id).set(data)) {
         resolve(true);
-      }else{
+      } else {
         resolve(false);
       }
 
