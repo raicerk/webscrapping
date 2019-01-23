@@ -10,7 +10,7 @@ router.get('/', cache(60), function (req, res) {
 
 
 //Ruta de acceso a los datos por fecha
-router.get('/groupedBy/date', cache(30), function (req, res) {
+router.get('/groupedBydate/:where/:value', cache(30), function (req, res) {
   control.ConsultaDatosPorFecha(req, res);
 });
 

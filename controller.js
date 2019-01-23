@@ -13,7 +13,7 @@ db.settings({
 
 exports.ConsultaDatos = function (req, res) {
 
-  db.collection("programacion")
+  db.collection("laboral")
     .orderBy("fecha", "desc")
     .get()
     .then((querySnapshot) => {
@@ -50,8 +50,8 @@ exports.ConsultaDatos = function (req, res) {
 
 exports.ConsultaDatosPorFecha = function (req, res) {
 
-  db.collection("programacion")
-    .orderBy("fecha", "asc")
+  db.collection("laboral")
+    .where(req.params.where,"==",req.params.value)
     .get()
     .then((querySnapshot) => {
       let arr = [];
