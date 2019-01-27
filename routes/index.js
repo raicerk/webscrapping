@@ -1,4 +1,5 @@
-const skills = require('./skills');
+// const skills = require('./skills');
+const graphql = require('./graphql');
 
 /**
  * Registro de rutas
@@ -7,7 +8,8 @@ const skills = require('./skills');
  * @returns {void}
  */
 const register = function(app) {
-  app.use('/skills', skills);
+  // app.use('/skills', skills);
+  app.use('/graphql', graphql);
 };
 
 module.exports = register;
