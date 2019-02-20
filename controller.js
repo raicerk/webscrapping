@@ -39,9 +39,6 @@ exports.scrapping = async function () {
 
         request(url, function (error, response, body) {
 
-          console.log(error);
-          console.log(response);
-
           try {
             var $ = cheerio.load(body);
 
@@ -96,7 +93,7 @@ exports.registro = function (req) {
 
     let dia = req.fecha.split(' ')[1];
     let mes = ms < 10 ? `0${ms}` : ms;
-    let ano = ms >= moment().month() + 1 ? 2018 : moment().year();
+    let ano = ms > moment().month() + 1 ? 2018 : moment().year();
     let id = req.pais + ":" + req.link.split('/')[5];
 
     try {
