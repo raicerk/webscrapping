@@ -39,6 +39,9 @@ exports.scrapping = async function () {
 
         request(url, function (error, response, body) {
 
+          console.log(error);
+          console.log(response);
+
           try {
             var $ = cheerio.load(body);
 
@@ -93,14 +96,14 @@ exports.registro = function (req) {
 
     let dia = req.fecha.split(' ')[1];
     let mes = ms < 10 ? `0${ms}` : ms;
-    let ano = ms >= 2 ? 2018 : moment().year();
-    let id = req.pais + ":" + req.link.split('/')[3];
+    let ano = ms >= moment().month() + 1 ? 2018 : moment().year();
+    let id = req.pais + ":" + req.link.split('/')[5];
 
     try {
 
       var data = {
         pais: req.pais,
-        link: `${req.dominio}${req.link}`,
+        link: req.link,
         fecha: `${ano}-${mes}-${dia}`,
         skill: req.skill,
         clasificacion: req.clasificacion
@@ -109,6 +112,7 @@ exports.registro = function (req) {
       if (db.collection('laboral').doc(id).set(data)) {
         resolve(true);
       } else {
+        console.log("errorrrr al insertar")
         resolve(false);
       }
 
