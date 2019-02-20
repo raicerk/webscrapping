@@ -107,6 +107,12 @@ const root = {
         });
       }
 
+      dattta.sort(function (a, b) {
+        if (a.fecha < b.fecha) return 1;
+        if (a.fecha > b.fecha) return -1;
+        return 0;
+      });
+
       iib.push({
         skill: value,
         datos: dattta
