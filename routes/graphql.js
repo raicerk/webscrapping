@@ -3,16 +3,19 @@ const db = require("../controllers/db");
 const { buildSchema } = require('graphql');
 const router = require("express").Router();
 
+/**
+ * Constructor de equema de datos de grahql
+ */
 const schema = buildSchema(`
 
   """Datos estadisticos sobre ofertas laborales y conocimientos requeridos para cada pais en el mundo de la tecnologia"""
   type Query {
     """Datos estadisticos con filtros"""
-    estadistica(where: FieldBy, order: OrderBy): [Laboral],
+    Laboral(where: FieldBy, order: OrderBy): [Laboral],
     """Datos estadisticos completos"""
-    estadisticas: [Laboral]
+    Laborales: [Laboral]
     """Datos agrupados por fecha"""
-    agrupadoporfecha(where: FieldBy): [Agrupacion]
+    LaboralAgrupadoPorMes(where: FieldBy): [Agrupacion]
   }
 
   input OrderBy {
@@ -56,20 +59,23 @@ const schema = buildSchema(`
   }
 `);
 
+/**
+ * Definición de las funciones que seran llamadas por el modelo de graphql
+ */
 const root = {
-  estadistica: async ({ where, order }) => {
+  Laboral: async ({ where, order }) => {
     const snapshot = await db.collection("laboral").where(where.field, "==", where.value).orderBy(order.by, order.orientation).get()
     const { docs } = snapshot;
     const data = docs.map(doc => doc.data())
     return data;
   },
-  estadisticas: async () => {
+  Laborales: async () => {
     const snapshot = await db.collection("laboral").get()
     const { docs } = snapshot;
     const data = docs.map(doc => doc.data())
     return data;
   },
-  agrupadoporfecha: async ({ where }) => {
+  LaboralAgrupadoPorMes: async ({ where }) => {
     const snapshot = await db.collection("laboral").where(where.field, "==", where.value).get()
     const { docs } = snapshot;
     const data = docs.map(doc => doc.data())
@@ -123,6 +129,9 @@ const root = {
   }
 };
 
+/**
+ * Llamado a la función de graphql
+ */
 router.use('/', graphqlHTTP({
   schema,
   rootValue: root,

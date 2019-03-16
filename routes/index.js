@@ -1,5 +1,6 @@
-// const skills = require('./skills');
 const graphql = require('./graphql');
+const cache = require('../util/cache-middleware');
+const config = require('../config');
 
 /**
  * Registro de rutas
@@ -8,8 +9,7 @@ const graphql = require('./graphql');
  * @returns {void}
  */
 const register = function(app) {
-  // app.use('/skills', skills);
-  app.use('/graphql', graphql);
+  app.use('/graphql', cache(config.cache), graphql);
 };
 
 module.exports = register;
