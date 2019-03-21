@@ -110,7 +110,7 @@ exports.registro = function (req) {
         fecha: `${ano}-${mes}-${dia}`,
         skill: req.skill,
         clasificacion: req.clasificacion,
-        sueldo: req.sueldo
+        sueldo: req.sueldo == undefined ? null : req.sueldo
       };
 
       if (db.collection('laboral').doc(id).set(data)) {
