@@ -58,6 +58,12 @@ exports.scrapping = async function () {
               json.pais = pais;
               json.dominio = dominio;
 
+              let money = data.find('.fa-money');
+
+              if(money[0]){
+                json.sueldo = money[0].attribs.title;
+              }
+
               let me = data.find('.ellipsis .tag');
 
               for (var i = 0; i < me.length; i++) {
@@ -103,7 +109,8 @@ exports.registro = function (req) {
         link: req.link,
         fecha: `${ano}-${mes}-${dia}`,
         skill: req.skill,
-        clasificacion: req.clasificacion
+        clasificacion: req.clasificacion,
+        sueldo: req.sueldo
       };
 
       if (db.collection('laboral').doc(id).set(data)) {
