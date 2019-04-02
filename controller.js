@@ -58,6 +58,8 @@ exports.scrapping = async function () {
               json.pais = pais;
               json.dominio = dominio;
 
+              json.compania = data.find('.company-name').html().trim();
+
               let money = data.find('.fa-money');
 
               if(money[0]){
@@ -83,7 +85,7 @@ exports.scrapping = async function () {
       })
     }
   } catch (error) {
-    console.log("error ssss");
+    console.log("error ssss"+error);
   }
 
 };
@@ -110,7 +112,8 @@ exports.registro = function (req) {
         fecha: `${ano}-${mes}-${dia}`,
         skill: req.skill,
         clasificacion: req.clasificacion,
-        sueldo: req.sueldo == undefined ? null : req.sueldo
+        sueldo: req.sueldo == undefined ? null : req.sueldo,
+        compania: req.compania
       };
 
       if (db.collection('laboral').doc(id).set(data)) {
