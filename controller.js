@@ -110,7 +110,11 @@ exports.registro = function (req) {
         fecha: `${ano}-${mes}-${dia}`,
         skill: req.skill,
         clasificacion: req.clasificacion,
-        sueldo: req.sueldo == undefined ? null : req.sueldo
+        sueldo: req.sueldo == undefined ? null : req.sueldo,
+        sueldominimo: req.sueldo == undefined ? null : req.sueldo.split("-")[0].trim(),
+        sueldomaximo: req.sueldo == undefined ? null : req.sueldo.split("-")[1].trim().split(" ")[0],
+        sueldomoneda: req.sueldo == undefined ? null : req.sueldo.split("-")[1].trim().split(" ")[1].split("/")[0],
+        sueldotipotiempo: req.sueldo == undefined ? null : req.sueldo.split("-")[1].trim().split(" ")[1].split("/")[1]
       };
 
       if (db.collection('laboral').doc(id).set(data)) {
