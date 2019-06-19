@@ -67,7 +67,7 @@ exports.scrapping = async function () {
                 return item.trim()
               });
 
-              //exports.registro(json);
+              exports.registro(json);
 
             });
           } catch (error) {
