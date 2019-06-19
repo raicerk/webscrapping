@@ -42,39 +42,32 @@ exports.scrapping = async function () {
           try {
             var $ = cheerio.load(body);
 
-            var count = 1;
-
-            $('.job').filter(function () {
-
-              count = count + 1;
-
+            $('.sgb-results-list div a').each(function (i) {
+             
               var data = $(this);
-              let obj = [];
               let json = {};
 
-              json.link = data[0].children[0].next.attribs.href;
-              json.fecha = data[0].children[0].next.children[7].next.children[0].data.replace(/\n/g, '');
+              json.link = data[0].attribs.href;
+              json.fecha = data[0].children[2].children[5].children[0].data.replace(/\n/g, '');
               json.clasificacion = clasificacion;
               json.pais = pais;
               json.dominio = dominio;
 
-              json.compania = data.find('.company-name').html().trim();
+              json.compania = data.find('.size0')[0].firstChild.data.trim();
 
               let money = data.find('.fa-money');
 
-              if(money[0]){
+              if (money[0]) {
                 json.sueldo = money[0].attribs.title;
               }
 
-              let me = data.find('.ellipsis .tag');
+              let me = data.find('.gb-results-list__limited-info');
 
-              for (var i = 0; i < me.length; i++) {
-                obj.push(me[i].children[0].data);
-              }
+              json.skill = me[0].children[2].data.replace(/\n/g, '').split(",").map(item=>{
+                return item.trim()
+              });
 
-              json.skill = obj;
-
-              exports.registro(json);
+              //exports.registro(json);
 
             });
           } catch (error) {
@@ -85,7 +78,7 @@ exports.scrapping = async function () {
       })
     }
   } catch (error) {
-    console.log("error ssss"+error);
+    console.log("error ssss" + error);
   }
 
 };
