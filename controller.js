@@ -4,6 +4,7 @@ const moment = require('moment');
 const admin = require("firebase-admin");
 const serviceAccount = require("./firebase-admin.json");
 const config = require('./config');
+const MongoClient = require('mongodb').MongoClient;
 
 /**
  * Carga de configuracion para firebase
@@ -24,9 +25,12 @@ db.settings({
  * Lee sitio web y tabula información
  * return boolean
  */
-exports.scrapping = async function () {
+exports.scrapping = async () => {
 
   try {
+
+    let conn = await exports.ConnectDB();
+
     var datos = config.sitios;
 
     for (i in datos) {
@@ -43,7 +47,7 @@ exports.scrapping = async function () {
             var $ = cheerio.load(body);
 
             $('.sgb-results-list div a').each(function (i) {
-             
+
               var data = $(this);
               let json = {};
 
@@ -63,11 +67,11 @@ exports.scrapping = async function () {
 
               let me = data.find('.gb-results-list__limited-info');
 
-              json.skill = me[0].children[2].data.replace(/\n/g, '').split(",").map(item=>{
+              json.skill = me[0].children[2].data.replace(/\n/g, '').split(",").map(item => {
                 return item.trim()
               });
 
-              exports.registro(json);
+              exports.registro(json,conn);
 
             });
           } catch (error) {
@@ -87,7 +91,7 @@ exports.scrapping = async function () {
  * Almacena información en db de scrapping
  * return Promise
  */
-exports.registro = function (req) {
+exports.registro = (req,conn) => {
   return new Promise((resolve, reject) => {
 
     let ms = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"].indexOf(req.fecha.split(' ')[0]) + 1;
@@ -113,7 +117,26 @@ exports.registro = function (req) {
         compania: req.compania
       };
 
-      if (db.collection('laboral').doc(id).set(data)) {
+      let dataFirebase = db.collection('laboral').doc(id).set(data);
+      
+      
+
+
+      let datafrommongo = data;
+      datafrommongo.unique = id;
+
+      conn.collection("laboral").insertOne(datafrommongo).then(result => {
+        conn.close();
+      }).catch(error=>{
+        //console.log(error)
+      })
+
+      
+      
+      
+      
+      
+      if (dataFirebase) {
         resolve(true);
       } else {
         console.log("errorrrr al insertar")
@@ -145,4 +168,30 @@ exports.Programable = function () {
       console.log(`Proxima ejecución ${nuevaHora}`);
     }
   }, 1000);
+
 };
+
+exports.ConnectDB = () => {
+  try {
+    let url = `mongodb+srv://${config.db.DB_USER}:${config.db.DB_PASSWORD}@${config.db.DB_HOST}/${config.db.DB_NAME}`;
+    return new Promise((resolve, reject) => {
+      var settings = {
+        reconnectTries: Number.MAX_VALUE,
+        reconnectInterval: 100,
+        autoReconnect: true,
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        poolSize: 2
+
+      };
+      let client = new MongoClient(url, settings);
+      client.connect().then(() => {
+        resolve(client.db(config.db.DB_NAME))
+      }).catch(err => {
+        reject(err)
+      })
+    })
+  } catch (error) {
+    nl.register(`Error en la conexion de la base de datos de mongo historico, el detalle es: ${error}`).error();
+  }
+}
