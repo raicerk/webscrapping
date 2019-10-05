@@ -1,4 +1,4 @@
-const request = require('postman-request');
+var request = require('request-promise');
 const cheerio = require('cheerio');
 const moment = require('moment');
 const admin = require("firebase-admin");
@@ -35,50 +35,44 @@ exports.scrapping = async () => {
 
     for (i in datos) {
 
-      Object.keys(datos[i].sitios).forEach(function eachKey(clasificacion) {
+      Object.keys(datos[i].sitios).forEach(async function eachKey(clasificacion) {
 
-        var pais = datos[i].pais;
-        var dominio = datos[i].dominiositio;
-        var url = datos[i].sitios[clasificacion];
+        let pais = datos[i].pais;
+        let dominio = datos[i].dominiositio;
 
-        request(url, function (error, response, body) {
-
-          try {
-            var $ = cheerio.load(body);
-
-            $('.sgb-results-list div a').each(function (i) {
-
-              var data = $(this);
-              let json = {};
-
-              json.link = data[0].attribs.href;
-              json.fecha = data[0].children[2].children[5].children[0].data.replace(/\n/g, '');
-              json.clasificacion = clasificacion;
-              json.pais = pais;
-              json.dominio = dominio;
-
-              json.compania = data.find('.size0')[0].firstChild.data.trim();
-
-              let money = data.find('.fa-money');
-
-              if (money[0]) {
-                json.sueldo = money[0].attribs.title;
-              }
-
-              let me = data.find('.gb-results-list__limited-info');
-
-              json.skill = me[0].children[2].data.replace(/\n/g, '').split(",").map(item => {
-                return item.trim()
-              });
-
-              exports.registro(json,conn);
-
-            });
-          } catch (error) {
-            console.error(error);
+        let $ = await request({
+          uri: datos[i].sitios[clasificacion],
+          transform: (body) => {
+            return cheerio.load(body);
           }
-
         });
+
+        let data = []
+        $('.sgb-results-list div a').map((i, el) => {
+          data.push($(el).attr("href"))
+        })
+
+        data.map(async item => {
+          let $ = await request({
+            uri: item,
+            transform: (body) => {
+              return cheerio.load(body, { decodeEntities: false });
+            }
+          })
+          let json = {};
+          json.link = item;
+          json.fecha = $(".mb3.mt2.flex.align-content-center").find("time").html().replace(/\n/g, '');
+          json.clasificacion = clasificacion
+          json.pais = pais;
+          json.dominio = dominio;
+          json.compania = $(".size1.w700.m0 span").html();
+          json.sueldo = $(".size2.mb-3.mt-3 strong").html() != null ? $(".size2.mb-3.mt-3 strong").html().replace(/^\n|\n$/g, '').replace(/\n/g, " ") : null;
+          json.skill = []
+          $(".gb-tags__item").map((i, el) =>{
+            json.skill.push($(el).html())
+          })
+          exports.registro(json, conn);
+        })
       })
     }
   } catch (error) {
@@ -91,14 +85,9 @@ exports.scrapping = async () => {
  * Almacena información en db de scrapping
  * return Promise
  */
-exports.registro = (req,conn) => {
+exports.registro = (req, conn) => {
   return new Promise((resolve, reject) => {
 
-    let ms = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"].indexOf(req.fecha.split(' ')[0]) + 1;
-
-    let dia = req.fecha.split(' ')[1];
-    let mes = ms < 10 ? `0${ms}` : ms;
-    let ano = ms > moment().month() + 1 ? 2018 : moment().year();
     let id = req.pais + ":" + req.link.split('/')[5];
 
     try {
@@ -106,11 +95,11 @@ exports.registro = (req,conn) => {
       var data = {
         pais: req.pais,
         link: req.link,
-        fecha: `${ano}-${mes}-${dia}`,
+        fecha: new Date(req.fecha.replace(/ de /g, '-')).toISOString().split("T")[0],
         skill: req.skill,
         clasificacion: req.clasificacion,
         sueldo: req.sueldo == undefined ? null : req.sueldo,
-        sueldominimo: req.sueldo == undefined ? null : parseInt(req.sueldo.split("-")[0].trim()),
+        sueldominimo: req.sueldo == undefined ? null : parseInt(req.sueldo.split("-")[0].trim().replace("$", "")),
         sueldomaximo: req.sueldo == undefined ? null : parseInt(req.sueldo.split("-")[1].trim().split(" ")[0]),
         sueldomoneda: req.sueldo == undefined ? null : req.sueldo.split("-")[1].trim().split(" ")[1].split("/")[0],
         sueldotipotiempo: req.sueldo == undefined ? null : req.sueldo.split("-")[1].trim().split(" ")[1].split("/")[1],
@@ -118,24 +107,16 @@ exports.registro = (req,conn) => {
       };
 
       let dataFirebase = db.collection('laboral').doc(id).set(data);
-      
-      
-
 
       let datafrommongo = data;
       datafrommongo.unique = id;
 
       conn.collection("laboral").insertOne(datafrommongo).then(result => {
         conn.close();
-      }).catch(error=>{
-        //console.log(error)
+      }).catch(error => {
+        console.log(error)
       })
 
-      
-      
-      
-      
-      
       if (dataFirebase) {
         resolve(true);
       } else {
