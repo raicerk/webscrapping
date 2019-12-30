@@ -24,3 +24,12 @@ module.exports.asyncForEach = async function (array, callback) {
         await callback(array[index], index, array);
     }
 }
+
+module.exports.normalizafecha = StringFecha => {
+    let fecha = StringFecha.replace(/ de /g, '-').split("-");
+    let meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+    let mes = meses.indexOf(fecha[1]) + 1;
+    let date = mes < 10 ?  "0".concat(mes) : mes;
+    let nueva = fecha[2]+"-"+date+"-"+fecha[0]
+    return nueva;
+}

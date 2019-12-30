@@ -5,6 +5,7 @@ const admin = require("firebase-admin");
 const serviceAccount = require("./firebase-admin.json");
 const config = require('./config');
 const MongoClient = require('mongodb').MongoClient;
+const util = require('./util');
 
 /**
  * Carga de configuracion para firebase
@@ -65,7 +66,7 @@ exports.scrapping = async () => {
           json.clasificacion = clasificacion
           json.pais = pais;
           json.dominio = dominio;
-          json.compania = $(".size1.w700.m0 span").html();
+          json.compania = $(".size1.m0 strong").html();
           json.sueldo = $(".size2.mb-3.mt-3 strong").html() != null ? $(".size2.mb-3.mt-3 strong").html().replace(/^\n|\n$/g, '').replace(/\n/g, " ") : null;
           json.skill = []
           $(".gb-tags__item").map((i, el) =>{
@@ -95,7 +96,7 @@ exports.registro = (req, conn) => {
       var data = {
         pais: req.pais,
         link: req.link,
-        fecha: new Date(req.fecha.replace(/ de /g, '-')).toISOString().split("T")[0],
+        fecha: util.normalizafecha(req.fecha),
         skill: req.skill,
         clasificacion: req.clasificacion,
         sueldo: req.sueldo == undefined ? null : req.sueldo,
@@ -173,6 +174,6 @@ exports.ConnectDB = () => {
       })
     })
   } catch (error) {
-    nl.register(`Error en la conexion de la base de datos de mongo historico, el detalle es: ${error}`).error();
+    console.log(`Error en la conexion de la base de datos de mongo historico, el detalle es: ${error}`);
   }
 }
