@@ -115,7 +115,7 @@ exports.registro = (req, conn) => {
       datafrommongo.unique = id;
 
       conn.collection("laboral").insertOne(datafrommongo).then(response => {
-        //console.log(response.result)
+        console.log(response.result)
       }).catch(error => {
         console.log(error)
       })
