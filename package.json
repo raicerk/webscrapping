@@ -27,16 +27,14 @@
   },
   "homepage": "https://github.com/raicerk/webscrapping#readme",
   "dependencies": {
+    "axios": "^0.19.2",
     "cheerio": "^0.22.0",
-    "firebase-admin": "^6.4.0",
-    "moment": "^2.18.1",
-    "mongodb": "^3.3.2",
-    "postman-request": "^2.88.1-postman.5",
-    "request": "^2.81.0",
-    "request-promise": "^4.2.4"
+    "firebase-admin": "^8.10.0",
+    "moment": "^2.24.0",
+    "mongodb": "^3.5.5"
   },
   "devDependencies": {
-    "eslint": "^5.11.1",
-    "nodemon": "^1.18.9"
+    "eslint": "^5.16.0",
+    "nodemon": "^1.19.4"
   }
 }
