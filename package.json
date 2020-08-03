@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/raicerk/webscrapping#readme",
   "dependencies": {
+    "axios": "^0.19.2",
     "cheerio": "^0.22.0",
     "firebase-admin": "^8.10.0",
     "moment": "^2.24.0",

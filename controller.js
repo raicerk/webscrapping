@@ -26,7 +26,7 @@ db.settings({
  * Lee sitio web y tabula información
  * return boolean
  */
-exports.scrapping = async () => {
+const scrapping = async () => {
 
   try {
 
@@ -45,7 +45,7 @@ exports.scrapping = async () => {
 
       let json = {};
       json.link = item.link;
-      json.fecha = $(".mb3.mt2.flex.align-content-center").find("time").html().replace(/\n/g, '');
+      json.fecha = $("time").html().replace(/\n/g, '');
       json.clasificacion = item.clasificacion
       json.pais = item.pais;
       json.dominio = item.dominio;
@@ -55,7 +55,7 @@ exports.scrapping = async () => {
       $(".gb-tags__item").map((i, el) => {
         json.skill.push($(el).html())
       })
-      exports.registro(json, conn);
+      registro(json, conn);
     })
 
 
@@ -69,7 +69,7 @@ exports.scrapping = async () => {
  * Almacena información en db de scrapping
  * return Promise
  */
-exports.registro = (req, conn) => {
+const registro = (req, conn) => {
   return new Promise(async (resolve, reject) => {
 
     try {
@@ -132,19 +132,22 @@ exports.registro = (req, conn) => {
  * Metodo recursivo para autoprogramar la ejecución del scrapping de manera aleatoria con sistema de minutos maximos y minimos.
  * return void
  */
-exports.Programable = function () {
+const Programable = () => {
   var nuevaHora = moment().add(5, 'seconds').format("YYYY-MM-DD HH:mm:ss");
   console.log(`La ejecución sera el ${nuevaHora}`);
-  setInterval(function () {
+  setInterval(async () => {
     var hora = moment().format("YYYY-MM-DD HH:mm:ss");
     if (hora == nuevaHora) {
+      await scrapping();
       console.log(`Ejecución ${nuevaHora}`);
-      exports.scrapping();
       nuevaHora = moment(new Date(nuevaHora));
       nuevaHora.add(Math.floor(Math.random() * (Math.floor(config.minutosMaximos) - Math.ceil(config.minutosMinimos) + 1)) + Math.ceil(config.minutosMinimos), 'minutes');
       nuevaHora = nuevaHora.format("YYYY-MM-DD HH:mm:ss");
       console.log(`Proxima ejecución ${nuevaHora}`);
     }
   }, 1000);
-
 };
+
+module.exports = {
+  Programable
+}
