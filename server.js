@@ -1,6 +1,3 @@
-//Configuración
-const config = require('./config');
-
 //Importación de controladores
 const control = require('./controller');
 
