@@ -1,5 +1,5 @@
 //Importación de controladores
-const control = require('./controller');
+const { Programable } = require('./controller');
 
 //Ejecuta el scrapping y se autoprograma
-control.Programable();
+Programable();

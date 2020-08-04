@@ -1,46 +1,37 @@
 const cheerio = require('cheerio');
 const moment = require('moment');
 const admin = require("firebase-admin");
-const serviceAccount = require("./firebase-admin.json");
-const config = require('./config');
-const util = require('./util');
 const axios = require('axios').default;
-const dbmongo = require('./db');
 
-/**
- * Carga de configuracion para firebase
- */
+const serviceAccount = require("./firebase-admin.json");
+
+const { normalizafecha, obtieneLink } = require('./util');
+const { ConnectDB } = require('./db');
+const { minutosMaximos, minutosMinimos } = require('./config');
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
-/**
- * Carga de configuracion de firestore de firebase
- */
 var db = admin.firestore();
 db.settings({
   timestampsInSnapshots: true
 });
 
-/**
- * Lee sitio web y tabula información
- * return boolean
- */
 const scrapping = async () => {
-
   try {
 
-    let conn = await dbmongo.ConnectDB();
+    let conn = await ConnectDB();
+    let data = await obtieneLink();
 
-    let data = await util.obtieneLink();
-
-    data.map(async item => {
+    const registros = data.map(async item => {
 
       let body = await axios.get(item.link, {
         headers: {
           'Accept-Language': 'es-ES,es;q=0.9'
         }
       })
+
       let $ = cheerio.load(body.data, { decodeEntities: false });
 
       let json = {};
@@ -55,9 +46,10 @@ const scrapping = async () => {
       $(".gb-tags__item").map((i, el) => {
         json.skill.push($(el).html())
       })
-      registro(json, conn);
-    })
+      return registro(json, conn);
+    });
 
+    await Promise.all(registros);
 
   } catch (error) {
     console.log("error ssss" + error);
@@ -65,21 +57,17 @@ const scrapping = async () => {
 
 };
 
-/**
- * Almacena información en db de scrapping
- * return Promise
- */
 const registro = (req, conn) => {
   return new Promise(async (resolve, reject) => {
 
     try {
 
-      let id = req.pais + ":" + req.link.split('/')[5];
+      const id = req.pais + ":" + req.link.split('/')[5];
 
-      var sueldominimo = "";
-      var sueldomaximo = "";
-      var sueldomoneda = "";
-      var sueldotipotiempo = "";
+      var sueldominimo = null;
+      var sueldomaximo = null;
+      var sueldomoneda = null;
+      var sueldotipotiempo = null;
 
       if (req.sueldo != null) {
         if (req.sueldo.split("-").length == 2) {
@@ -95,10 +83,10 @@ const registro = (req, conn) => {
         }
       }
 
-      var data = {
+      const data = {
         pais: req.pais,
         link: req.link,
-        fecha: util.normalizafecha(req.fecha),
+        fecha: normalizafecha(req.fecha),
         skill: req.skill,
         clasificacion: req.clasificacion,
         sueldo: req.sueldo == undefined ? null : req.sueldo,
@@ -109,31 +97,25 @@ const registro = (req, conn) => {
         compania: req.compania
       };
 
-      db.collection('laboral').doc(id).set(data)
+      let datafrommongo = { ...data };
+      Object.assign(datafrommongo, {unique: id})
 
-      let datafrommongo = data;
-      datafrommongo.unique = id;
+      const resultDB = await Promise.all([
+        db.collection('laboral').doc(id).set(data),
+        conn.collection("laboral").insertOne(datafrommongo)
+      ]);
 
-      conn.collection("laboral").insertOne(datafrommongo).then(response => {
-        console.log(response.result)
-      }).catch(error => {
-        console.log(error)
-      })
+      resolve(resultDB);
 
-    } catch (e) {
-      console.log(req)
-      console.log(e);
-      reject(e);
+    } catch (error) {
+      reject(error);
     }
   });
 };
 
-/**
- * Metodo recursivo para autoprogramar la ejecución del scrapping de manera aleatoria con sistema de minutos maximos y minimos.
- * return void
- */
 const Programable = () => {
-  var nuevaHora = moment().add(5, 'seconds').format("YYYY-MM-DD HH:mm:ss");
+  try {
+    var nuevaHora = moment().add(5, 'seconds').format("YYYY-MM-DD HH:mm:ss");
   console.log(`La ejecución sera el ${nuevaHora}`);
   setInterval(async () => {
     var hora = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -141,11 +123,14 @@ const Programable = () => {
       await scrapping();
       console.log(`Ejecución ${nuevaHora}`);
       nuevaHora = moment(new Date(nuevaHora));
-      nuevaHora.add(Math.floor(Math.random() * (Math.floor(config.minutosMaximos) - Math.ceil(config.minutosMinimos) + 1)) + Math.ceil(config.minutosMinimos), 'minutes');
+      nuevaHora.add(Math.floor(Math.random() * (Math.floor(minutosMaximos) - Math.ceil(minutosMinimos) + 1)) + Math.ceil(minutosMinimos), 'minutes');
       nuevaHora = nuevaHora.format("YYYY-MM-DD HH:mm:ss");
       console.log(`Proxima ejecución ${nuevaHora}`);
     }
   }, 1000);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 module.exports = {
